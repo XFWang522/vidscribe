@@ -2,6 +2,8 @@
 
 **Transcribe any video URL to text with one command.**
 
+An **Agent Skill** for AI coding assistants (Cursor, Windsurf, Codex, etc.) and a standalone CLI tool. Give your AI agent the ability to transcribe any video — just paste a link.
+
 Supports **Bilibili, YouTube, TikTok/Douyin, Twitter/X, Vimeo**, and [1000+ sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) via yt-dlp.
 
 [中文文档](README_zh.md)
@@ -9,6 +11,25 @@ Supports **Bilibili, YouTube, TikTok/Douyin, Twitter/X, Vimeo**, and [1000+ site
 ---
 
 ## Quick Start
+
+### As an Agent Skill (Cursor / Windsurf / Codex)
+
+Copy the skill into your personal skills directory:
+
+```bash
+# Cursor
+cp -r agent-skill ~/.cursor/skills/vidscribe
+
+# Windsurf
+cp -r agent-skill ~/.windsurf/skills/vidscribe
+
+# Codex
+cp -r agent-skill ~/.codex/skills/vidscribe
+```
+
+Then just tell your AI agent: *"Transcribe this video: https://..."* — it will know how to use vidscribe automatically.
+
+### As a CLI Tool
 
 ```bash
 pip install vidscribe
@@ -22,6 +43,7 @@ vidscribe "https://www.youtube.com/watch?v=dQw4w9WgXcQ" -o transcript.txt
 
 ## Features
 
+- **Agent Skill** - plug into Cursor / Windsurf / Codex as a reusable AI skill
 - **One command** - just paste a URL, get text
 - **1000+ sites** - any platform supported by yt-dlp
 - **5 ASR providers** - choose by quality, speed, price, or language
@@ -182,6 +204,30 @@ vidscribe auto-detects providers in this priority order:
 5. Local (if `faster-whisper` is installed)
 
 Override with `-p <provider>` flag.
+
+## Agent Skill Integration
+
+vidscribe ships with a ready-to-use `agent-skill/SKILL.md` that works with any AI coding assistant that supports skills (Cursor, Windsurf, Codex, etc.).
+
+**What is an Agent Skill?** Agent Skills are reusable capabilities you can add to AI coding assistants. Once installed, the AI automatically knows when and how to use the tool — no manual prompting needed.
+
+**Install:**
+
+```bash
+# Clone the repo
+git clone https://github.com/XFWang522/vidscribe.git
+
+# Copy the skill to your assistant
+cp -r vidscribe/agent-skill ~/.cursor/skills/vidscribe
+```
+
+**How it works:**
+1. You tell your AI: *"Transcribe this video: https://www.bilibili.com/video/BV1xxx"*
+2. The AI reads the SKILL.md, understands the tool's capabilities
+3. It runs `vidscribe` with the right parameters
+4. You get the full transcript in your editor
+
+Works with any video platform — Bilibili, YouTube, TikTok, Twitter/X, and 1000+ more.
 
 ## License
 

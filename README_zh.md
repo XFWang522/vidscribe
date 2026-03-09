@@ -2,6 +2,8 @@
 
 **一条命令，将任意视频链接转为文字。**
 
+一个面向 AI 编程助手（Cursor、Windsurf、Codex 等）的 **Agent Skill**，同时也是独立的命令行工具。让你的 AI 助手获得视频转文字的能力——只需粘贴链接。
+
 支持 **B站、YouTube、抖音/TikTok、Twitter/X、Vimeo** 等 [1000+ 个平台](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)。
 
 [English](README.md)
@@ -9,6 +11,25 @@
 ---
 
 ## 快速开始
+
+### 作为 Agent Skill（Cursor / Windsurf / Codex）
+
+将 skill 目录复制到你的技能目录：
+
+```bash
+# Cursor
+cp -r agent-skill ~/.cursor/skills/vidscribe
+
+# Windsurf
+cp -r agent-skill ~/.windsurf/skills/vidscribe
+
+# Codex
+cp -r agent-skill ~/.codex/skills/vidscribe
+```
+
+然后直接对 AI 说：*"把这个视频转成文字：https://..."* —— 它会自动使用 vidscribe 完成转录。
+
+### 作为命令行工具
 
 ```bash
 pip install vidscribe
@@ -23,6 +44,7 @@ vidscribe "https://www.bilibili.com/video/BV1xxx" -o transcript.txt
 
 ## 特性
 
+- **Agent Skill** - 一键接入 Cursor / Windsurf / Codex，成为 AI 助手的可复用技能
 - **一条命令** - 粘贴链接，获得文字
 - **1000+ 平台** - yt-dlp 支持的所有视频网站
 - **5 种语音识别服务** - 按质量、速度、价格自由选择
@@ -159,6 +181,30 @@ vidscribe 按以下优先级自动检测服务：
 5. 本地模型（安装了 `faster-whisper`）
 
 可用 `-p <provider>` 手动指定。
+
+## Agent Skill 集成
+
+vidscribe 自带 `agent-skill/SKILL.md`，可直接作为 Agent Skill 接入任何支持技能的 AI 编程助手（Cursor、Windsurf、Codex 等）。
+
+**什么是 Agent Skill？** Agent Skill 是可以添加到 AI 编程助手的可复用能力。安装后，AI 会自动知道何时以及如何使用该工具——无需手动提示。
+
+**安装方法：**
+
+```bash
+# 克隆仓库
+git clone https://github.com/XFWang522/vidscribe.git
+
+# 将 skill 复制到你的助手目录
+cp -r vidscribe/agent-skill ~/.cursor/skills/vidscribe
+```
+
+**工作流程：**
+1. 你对 AI 说：*"把这个视频转成文字：https://www.bilibili.com/video/BV1xxx"*
+2. AI 读取 SKILL.md，理解工具的能力
+3. AI 使用正确的参数运行 `vidscribe`
+4. 你在编辑器中获得完整的转录文本
+
+支持所有视频平台——B站、YouTube、抖音、Twitter/X 等 1000+ 个站点。
 
 ## 许可证
 
