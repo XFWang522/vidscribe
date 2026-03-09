@@ -1,4 +1,4 @@
-# vidscribe
+# vidscribe (MCP/Agent Skill/CLI tool)
 
 **Transcribe any video URL to text with one command.**
 
