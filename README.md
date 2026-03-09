@@ -2,7 +2,7 @@
 
 **Transcribe any video URL to text with one command.**
 
-An **Agent Skill** for AI coding assistants (Cursor, Windsurf, Codex, etc.) and a standalone CLI tool. Give your AI agent the ability to transcribe any video — just paste a link.
+An **MCP** Server + **Agent Skill** for AI coding assistants, and a standalone CLI tool. Give your AI agent the ability to transcribe any video — just paste a link.
 
 Supports **Bilibili, YouTube, TikTok/Douyin, Twitter/X, Vimeo**, and [1000+ sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) via yt-dlp.
 
@@ -12,7 +12,27 @@ Supports **Bilibili, YouTube, TikTok/Douyin, Twitter/X, Vimeo**, and [1000+ site
 
 ## Quick Start
 
-### As an Agent Skill (Cursor / Windsurf / Codex)
+### As an **MCP** Server (Claude Desktop / Cursor / any MCP client)
+
+```bash
+pip install vidscribe[mcp]
+```
+
+Add to your MCP client config (e.g. `claude_desktop_config.json` or Cursor MCP settings):
+
+```json
+{
+  "mcpServers": {
+    "vidscribe": {
+      "command": "vidscribe-mcp"
+    }
+  }
+}
+```
+
+Then just ask your AI: *"Transcribe this video: https://..."*
+
+### As an **Agent Skill** (Cursor / Windsurf / Codex)
 
 Copy the skill into your personal skills directory:
 
@@ -43,6 +63,7 @@ vidscribe "https://www.youtube.com/watch?v=dQw4w9WgXcQ" -o transcript.txt
 
 ## Features
 
+- **MCP Server** - works with Claude Desktop, Cursor, and any MCP-compatible client
 - **Agent Skill** - plug into Cursor / Windsurf / Codex as a reusable AI skill
 - **One command** - just paste a URL, get text
 - **1000+ sites** - any platform supported by yt-dlp
@@ -57,12 +78,15 @@ vidscribe "https://www.youtube.com/watch?v=dQw4w9WgXcQ" -o transcript.txt
 # Core (with cloud providers that need no extra deps)
 pip install vidscribe
 
+# With MCP server support
+pip install vidscribe[mcp]         # MCP Server
+
 # With specific provider support
 pip install vidscribe[openai]      # OpenAI Whisper API
 pip install vidscribe[deepgram]    # Deepgram
 pip install vidscribe[aliyun]      # Aliyun DashScope
 pip install vidscribe[local]       # Local faster-whisper (offline)
-pip install vidscribe[all]         # Everything
+pip install vidscribe[all]         # Everything (MCP + all providers)
 ```
 
 **System dependencies:**
@@ -205,11 +229,66 @@ vidscribe auto-detects providers in this priority order:
 
 Override with `-p <provider>` flag.
 
-## Agent Skill Integration
+## **MCP** Server Integration
 
-vidscribe ships with a ready-to-use `agent-skill/SKILL.md` that works with any AI coding assistant that supports skills (Cursor, Windsurf, Codex, etc.).
+vidscribe can run as an **MCP** (Model Context Protocol) server, exposing video transcription as a tool that any MCP-compatible AI client can call directly.
 
-**What is an Agent Skill?** Agent Skills are reusable capabilities you can add to AI coding assistants. Once installed, the AI automatically knows when and how to use the tool — no manual prompting needed.
+**What is MCP?** [Model Context Protocol](https://modelcontextprotocol.io/) is an open standard for connecting AI assistants to external tools. It lets AI models call your tools natively — no shell commands, no copy-paste.
+
+**Install & run:**
+
+```bash
+pip install vidscribe[mcp]
+```
+
+**Configure your MCP client:**
+
+<details>
+<summary>Claude Desktop</summary>
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "vidscribe": {
+      "command": "vidscribe-mcp"
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+Add to your Cursor MCP settings (`.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "vidscribe": {
+      "command": "vidscribe-mcp"
+    }
+  }
+}
+```
+</details>
+
+**Exposed MCP tools:**
+
+| Tool | Description |
+|------|-------------|
+| `transcribe` | Transcribe a video URL to text. Params: `url`, `provider`, `lang`, `output_path` |
+| `list_available_providers` | List all ASR providers and whether they are configured |
+
+**Environment variables:** The MCP server reads the same env vars as the CLI (`VOLC_APP_KEY`, `OPENAI_API_KEY`, etc.). Set them in your shell profile before starting the MCP server.
+
+## **Agent Skill** Integration
+
+vidscribe ships with a ready-to-use `agent-skill/SKILL.md` that works with any AI coding assistant that supports **Agent Skills** (Cursor, Windsurf, Codex, etc.).
+
+**What is an Agent Skill?** **Agent Skills** are reusable capabilities you can add to AI coding assistants. Once installed, the AI automatically knows when and how to use the tool — no manual prompting needed.
 
 **Install:**
 
@@ -228,6 +307,18 @@ cp -r vidscribe/agent-skill ~/.cursor/skills/vidscribe
 4. You get the full transcript in your editor
 
 Works with any video platform — Bilibili, YouTube, TikTok, Twitter/X, and 1000+ more.
+
+## **MCP** vs **Agent Skill** — Which to use?
+
+| | **MCP** Server | **Agent Skill** |
+|---|---|---|
+| **Protocol** | Standard MCP (JSON-RPC over stdio) | Markdown file read by AI |
+| **Works with** | Claude Desktop, Cursor, any MCP client | Cursor, Windsurf, Codex |
+| **Setup** | `pip install` + config JSON | Copy a folder |
+| **Tool discovery** | Automatic via MCP protocol | AI reads SKILL.md |
+| **Best for** | Claude Desktop users; standardized tool integration | Cursor/Windsurf users who prefer skills |
+
+You can use both simultaneously — they don't conflict.
 
 ## License
 

@@ -2,7 +2,7 @@
 
 **一条命令，将任意视频链接转为文字。**
 
-一个面向 AI 编程助手（Cursor、Windsurf、Codex 等）的 **Agent Skill**，同时也是独立的命令行工具。让你的 AI 助手获得视频转文字的能力——只需粘贴链接。
+一个 **MCP** 服务器 + **Agent Skill**，面向 AI 编程助手（Claude Desktop、Cursor、Windsurf、Codex 等），同时也是独立的命令行工具。让你的 AI 助手获得视频转文字的能力——只需粘贴链接。
 
 支持 **B站、YouTube、抖音/TikTok、Twitter/X、Vimeo** 等 [1000+ 个平台](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)。
 
@@ -12,7 +12,27 @@
 
 ## 快速开始
 
-### 作为 Agent Skill（Cursor / Windsurf / Codex）
+### 作为 **MCP** 服务器（Claude Desktop / Cursor / 任意 MCP 客户端）
+
+```bash
+pip install vidscribe[mcp]
+```
+
+在 MCP 客户端配置中添加（如 `claude_desktop_config.json` 或 Cursor MCP 设置）：
+
+```json
+{
+  "mcpServers": {
+    "vidscribe": {
+      "command": "vidscribe-mcp"
+    }
+  }
+}
+```
+
+然后直接对 AI 说：*"把这个视频转成文字：https://..."*
+
+### 作为 **Agent Skill**（Cursor / Windsurf / Codex）
 
 将 skill 目录复制到你的技能目录：
 
@@ -44,6 +64,7 @@ vidscribe "https://www.bilibili.com/video/BV1xxx" -o transcript.txt
 
 ## 特性
 
+- **MCP Server** - 支持 Claude Desktop、Cursor 及任何 MCP 兼容客户端
 - **Agent Skill** - 一键接入 Cursor / Windsurf / Codex，成为 AI 助手的可复用技能
 - **一条命令** - 粘贴链接，获得文字
 - **1000+ 平台** - yt-dlp 支持的所有视频网站
@@ -58,12 +79,15 @@ vidscribe "https://www.bilibili.com/video/BV1xxx" -o transcript.txt
 # 基础安装（含火山引擎，无需额外依赖）
 pip install vidscribe
 
+# 安装 MCP 服务器支持
+pip install vidscribe[mcp]         # MCP Server
+
 # 按需安装特定服务支持
 pip install vidscribe[openai]      # OpenAI Whisper API
 pip install vidscribe[deepgram]    # Deepgram
 pip install vidscribe[aliyun]      # 阿里云 DashScope
 pip install vidscribe[local]       # 本地 faster-whisper（离线）
-pip install vidscribe[all]         # 全部安装
+pip install vidscribe[all]         # 全部安装（MCP + 所有服务）
 ```
 
 **系统依赖：**
@@ -182,11 +206,66 @@ vidscribe 按以下优先级自动检测服务：
 
 可用 `-p <provider>` 手动指定。
 
-## Agent Skill 集成
+## **MCP** 服务器集成
 
-vidscribe 自带 `agent-skill/SKILL.md`，可直接作为 Agent Skill 接入任何支持技能的 AI 编程助手（Cursor、Windsurf、Codex 等）。
+vidscribe 可以作为 **MCP**（Model Context Protocol）服务器运行，将视频转录作为工具暴露给任何兼容 MCP 的 AI 客户端。
 
-**什么是 Agent Skill？** Agent Skill 是可以添加到 AI 编程助手的可复用能力。安装后，AI 会自动知道何时以及如何使用该工具——无需手动提示。
+**什么是 MCP？** [Model Context Protocol](https://modelcontextprotocol.io/) 是连接 AI 助手与外部工具的开放标准。让 AI 模型原生调用你的工具——无需 shell 命令，无需复制粘贴。
+
+**安装并运行：**
+
+```bash
+pip install vidscribe[mcp]
+```
+
+**配置 MCP 客户端：**
+
+<details>
+<summary>Claude Desktop</summary>
+
+编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）或 `%APPDATA%\Claude\claude_desktop_config.json`（Windows）：
+
+```json
+{
+  "mcpServers": {
+    "vidscribe": {
+      "command": "vidscribe-mcp"
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+在 Cursor MCP 设置（`.cursor/mcp.json`）中添加：
+
+```json
+{
+  "mcpServers": {
+    "vidscribe": {
+      "command": "vidscribe-mcp"
+    }
+  }
+}
+```
+</details>
+
+**暴露的 MCP 工具：**
+
+| 工具 | 描述 |
+|------|------|
+| `transcribe` | 将视频 URL 转录为文字。参数：`url`、`provider`、`lang`、`output_path` |
+| `list_available_providers` | 列出所有 ASR 服务及其配置状态 |
+
+**环境变量：** MCP 服务器读取与 CLI 相同的环境变量（`VOLC_APP_KEY`、`OPENAI_API_KEY` 等）。在启动 MCP 服务器前设置好即可。
+
+## **Agent Skill** 集成
+
+vidscribe 自带 `agent-skill/SKILL.md`，可直接作为 **Agent Skill** 接入任何支持技能的 AI 编程助手（Cursor、Windsurf、Codex 等）。
+
+**什么是 Agent Skill？** **Agent Skill** 是可以添加到 AI 编程助手的可复用能力。安装后，AI 会自动知道何时以及如何使用该工具——无需手动提示。
 
 **安装方法：**
 
@@ -205,6 +284,18 @@ cp -r vidscribe/agent-skill ~/.cursor/skills/vidscribe
 4. 你在编辑器中获得完整的转录文本
 
 支持所有视频平台——B站、YouTube、抖音、Twitter/X 等 1000+ 个站点。
+
+## **MCP** vs **Agent Skill** —— 如何选择？
+
+| | **MCP** 服务器 | **Agent Skill** |
+|---|---|---|
+| **协议** | 标准 MCP（JSON-RPC over stdio） | AI 读取 Markdown 文件 |
+| **适用客户端** | Claude Desktop、Cursor、任何 MCP 客户端 | Cursor、Windsurf、Codex |
+| **安装方式** | `pip install` + 配置 JSON | 复制文件夹 |
+| **工具发现** | 通过 MCP 协议自动发现 | AI 读取 SKILL.md |
+| **推荐场景** | Claude Desktop 用户；标准化工具集成 | Cursor/Windsurf 用户；偏好 Skill 模式 |
+
+两者可以同时使用，互不冲突。
 
 ## 许可证
 
